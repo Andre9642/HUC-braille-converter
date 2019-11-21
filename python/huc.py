@@ -76,7 +76,7 @@ def HUC8DotsToHUC6Dots(s, debug=False):
 	s = s.split('-')
 	for i, s_ in enumerate(s):
 		if i % 2:
-			o.append(mergeHexVals(s_, True, debug))
+			o.append(changeDotLevels(s_, True, debug))
 		isEven = bool(i % 2)
 		curPos = -1
 		for j, c in enumerate(s_):
@@ -85,28 +85,28 @@ def HUC8DotsToHUC6Dots(s, debug=False):
 				curPos = j
 				break
 		if curPos == -1: o.insert(curPos, s[i])
-		else: o.append(s_[0:j] + '-' + mergeHexVals(s_[j:], True, debug))
+		else: o.append(s_[0:j] + '-' + changeDotLevels(s_[j:], True, debug))
 	if debug: print(":HUC8DotsToHUC6Dots: %s" % s, "->", o)
 	return '-'.join(o)
 
 
-def mergeHexVals(dots, HUC6=False, debug=False):
+def changeDotLevels(dots, HUC6=False, debug=False):
 	out = ""
 	newDots = {
 		'0': '0',
 		'1': '2' if HUC6 else '3',
 		'2': '3' if HUC6 else '7',
-		'3': '7' if HUC6 else '1',
+		'3': '1' if HUC6 else '7',
 		'4': '5' if HUC6 else '6',
 		'5': '6' if HUC6 else '8',
-		'6': '8' if HUC6 else '4',
+		'6': '4' if HUC6 else '8',
 		'7': '1' if HUC6 else '2',
 		'8': '4' if HUC6 else '5'
 	}
 	for dot in dots:
 		out += newDots[dot]
 	out = '-'.join([''.join(sorted(out_)) for out_ in out.split('-')])
-	if debug: print(":mergeHexVals:", dots, "->", out)
+	if debug: print(":changeDotLevels:", dots, "->", out)
 	return out
 
 
@@ -118,10 +118,11 @@ def convertChar(c, HUC6=False, debug=False):
 	if len(hexVal) < 4: hexVal = ("%4s" % hexVal).replace(' ', '0')
 	if debug: print(":convertChar:0:", c, hexVal)
 	for i, l in enumerate(hexVal):
-		out += mergeHexVals(
-			hexVals[l], HUC6, debug=debug) if i % 2 else (
+		out_ = changeDotLevels(
+			hexVals[l], debug=debug) if i % 2 else (
 			'-' if i > 0 else '') + hexVals[l]
-		if debug: print(":convertChar:1:", out)
+		out += out_
+		if debug: print(":convertChar:1: %s -> %s" % (l, out_))
 	if HUC6:
 		out = HUC8DotsToHUC6Dots(out, debug=debug)
 	out = cellDescriptionsToUnicodeBraille(out)
