@@ -48,6 +48,7 @@ hexVals = {
 	'B': "45", 'C': "25", 'D': "2", 'E': '5', 'F': '0'
 }
 
+print_ = print
 
 def cellDescToChar(cell):
 	if not re.match("^[0-8]+$", cell):
@@ -86,7 +87,7 @@ def HUC8DotsToHUC6Dots(s, debug=False):
 				break
 		if curPos == -1: o.insert(curPos, s[i])
 		else: o.append(s_[0:j] + '-' + changeDotLevels(s_[j:], True, debug))
-	if debug: print(":HUC8DotsToHUC6Dots: %s" % s, "->", o)
+	if debug: print_(":HUC8DotsToHUC6Dots: %s" % s, "->", repr(o))
 	return '-'.join(o)
 
 
@@ -106,7 +107,7 @@ def changeDotLevels(dots, HUC6=False, debug=False):
 	for dot in dots:
 		out += newDots[dot]
 	out = '-'.join([''.join(sorted(out_)) for out_ in out.split('-')])
-	if debug: print(":changeDotLevels:", dots, "->", out)
+	if debug: print_(":changeDotLevels:", dots, "->", out)
 	return out
 
 
@@ -116,20 +117,20 @@ def convertChar(c, HUC6=False, debug=False):
 	ord_ = ord(c)
 	hexVal = hex(ord_)[2:][-4:].upper()
 	if len(hexVal) < 4: hexVal = ("%4s" % hexVal).replace(' ', '0')
-	if debug: print(":convertChar:0:", c, hexVal)
+	if debug: print_(":convertChar:0:", c, hexVal)
 	for i, l in enumerate(hexVal):
 		out_ = changeDotLevels(
 			hexVals[l], debug=debug) if i % 2 else (
 			'-' if i > 0 else '') + hexVals[l]
 		out += out_
-		if debug: print(":convertChar:1: %s -> %s" % (l, out_))
+		if debug: print_(":convertChar:1: %s -> %s" % (l, out_))
 	if HUC6:
 		out = HUC8DotsToHUC6Dots(out, debug=debug)
 	out = cellDescriptionsToUnicodeBraille(out)
 	if '…' not in pattern:
 		pattern += '…'
 	out = pattern.replace('…', out)
-	if debug: print(":convertChar:3:", out)
+	if debug: print_(":convertChar:3:", out)
 	return out
 
 
@@ -138,5 +139,5 @@ def convert(s, HUC6=False, debug=False): return ''.join([convertChar(c, HUC6, de
 
 if __name__ == "__main__":
 	t = input("Text to convert: ")
-	print("HUC8: %s" % convert(t))
+	print_("HUC8: %s" % convert(t))
 	print("HUC6: %s" % convert(t, True))

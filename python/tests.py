@@ -26,7 +26,7 @@ def printAndWriteFile(*args, **kwargs):
 		f.write(kwargs["end"].encode())
 	print(*args, **kwargs)
 
-
+huc.print_ = printAndWriteFile
 for i, (s, (expectedHUC8, expectedHUC6)) in enumerate(tests.items(), 1):
 	testHUC8 = huc.convert(s)
 	testHUC6 = huc.convert(s, True)
