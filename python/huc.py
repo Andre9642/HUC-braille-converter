@@ -2,42 +2,42 @@
 import re
 
 HUC6_patterns = {
-	"⠿…⠄": (0x0000, 0xFFFF),
-	"⠿…⠠": (0x10000, 0x1FFFF),
-	"⠿…⠤⠇": (0x20000, 0x2FFFF),
-	"⠿…⠤⠍": (0x30000, 0x3FFFF),
-	"⠿…⠤⠝": (0x40000, 0x4FFFF),
-	"⠿…⠤⠕": (0x50000, 0x5FFFF),
-	"⠿…⠤⠏": (0x60000, 0x6FFFF),
-	"⠿…⠤⠟": (0x70000, 0x7FFFF),
-	"⠿…⠤⠗": (0x80000, 0x8FFFF),
-	"⠿…⠤⠎": (0x90000, 0x9FFFF),
-	"⠿…⠤⠌": (0xA0000, 0xAFFFF),
-	"⠿…⠤⠜": (0xB0000, 0xBFFFF),
-	"⠿…⠤⠖": (0xC0000, 0xCFFFF),
-	"⠿…⠤⠆": (0xD0000, 0xDFFFF),
-	"⠿…⠤⠔": (0xE0000, 0xEFFFF),
-	"⠿…⠤⠄": (0xF0000, 0xFFFFF),
+	"⠿…⠄":  (0x000000, 0x00FFFF),
+	"⠿…⠠":  (0x010000, 0x01FFFF),
+	"⠿…⠤⠇": (0x020000, 0x02FFFF),
+	"⠿…⠤⠍": (0x030000, 0x03FFFF),
+	"⠿…⠤⠝": (0x040000, 0x04FFFF),
+	"⠿…⠤⠕": (0x050000, 0x05FFFF),
+	"⠿…⠤⠏": (0x060000, 0x06FFFF),
+	"⠿…⠤⠟": (0x070000, 0x07FFFF),
+	"⠿…⠤⠗": (0x080000, 0x08FFFF),
+	"⠿…⠤⠎": (0x090000, 0x09FFFF),
+	"⠿…⠤⠌": (0x0A0000, 0x0AFFFF),
+	"⠿…⠤⠜": (0x0B0000, 0x0BFFFF),
+	"⠿…⠤⠖": (0x0C0000, 0x0CFFFF),
+	"⠿…⠤⠆": (0x0D0000, 0x0DFFFF),
+	"⠿…⠤⠔": (0x0E0000, 0x0EFFFF),
+	"⠿…⠤⠄": (0x0F0000, 0x0FFFFF),
 	"⠿…⠤⠥": (0x100000, 0x10FFFF),
 }
 
 HUC8_patterns = {
-	'⣥': (0x0000,   0xFFFF),
-	'⣭': (0x10000, 0x1FFFF),
-	'⣽': (0x20000, 0x2FFFF),
-	"⣵⠾": (0x30000, 0x10FFFF),
-	"⣵⢾": (0x40000, 0x4FFFF),
-	"⣵⢞": (0x50000, 0x5FFFF),
-	"⣵⡾": (0x60000, 0x6FFFF),
-	"⣵⣾": (0x70000, 0x7FFFF),
-	"⣵⣞": (0x80000, 0x8FFFF),
-	"⣵⡺": (0x90000, 0x9FFFF),
-	"⣵⠺": (0xA0000, 0xAFFFF),
-	"⣵⢺": (0xB0000, 0xBFFFF),
-	"⣵⣚": (0xC0000, 0xCFFFF),
-	"⣵⡚": (0xD0000, 0xDFFFF),
-	"⣵⢚": (0xE0000, 0xEFFFF),
-	"⣵⠚": (0xF0000, 0xFFFFF),
+	'⣥':  (0x000000, 0x00FFFF),
+	'⣭':  (0x010000, 0x01FFFF),
+	'⣽':  (0x020000, 0x02FFFF),
+	"⣵⠾": (0x030000, 0x03FFFF),
+	"⣵⢾": (0x040000, 0x04FFFF),
+	"⣵⢞": (0x050000, 0x05FFFF),
+	"⣵⡾": (0x060000, 0x06FFFF),
+	"⣵⣾": (0x070000, 0x07FFFF),
+	"⣵⣞": (0x080000, 0x08FFFF),
+	"⣵⡺": (0x090000, 0x09FFFF),
+	"⣵⠺": (0x0A0000, 0x0AFFFF),
+	"⣵⢺": (0x0B0000, 0x0BFFFF),
+	"⣵⣚": (0x0C0000, 0x0CFFFF),
+	"⣵⡚": (0x0D0000, 0x0DFFFF),
+	"⣵⢚": (0x0E0000, 0x0EFFFF),
+	"⣵⠚": (0x0F0000, 0x0FFFFF),
 	"⣵⣡": (0x100000, 0x10FFFF)
 }
 
@@ -48,28 +48,36 @@ hexVals = {
 	'B': "45", 'C': "25", 'D': "2", 'E': '5', 'F': '0'
 }
 
+
 def cellDescToChar(cell):
-	if not re.match("^[0-8]+$", cell): return '?'
+	if not re.match("^[0-8]+$", cell):
+		return '?'
 	toAdd = 0
-	for dot in cell: toAdd += 1 << int(dot)-1 if int(dot) > 0 else 0
-	return chr(10240+toAdd)
+	for dot in cell:
+		toAdd += 1 << int(dot) - 1 if int(dot) > 0 else 0
+	return chr(0x2800 + toAdd)
+
 
 def cellDescriptionsToUnicodeBraille(t):
-	return re.sub('([0-8]+)\-?', lambda m: cellDescToChar(m.group(1)), t)
+	return re.sub(r'([0-8]+)\-?', lambda m: cellDescToChar(m.group(1)), t)
+
 
 def getPattern(c, HUC6=False):
 	ord_ = ord(c)
 	patterns = HUC6_patterns if HUC6 else HUC8_patterns
 	for pattern in patterns.items():
-		if pattern[1][1] >= ord_: return pattern[0]
+		if pattern[1][1] >= ord_:
+			return pattern[0]
 	return '?'
+
 
 def HUC8DotsToHUC6Dots(s, debug=False):
 	o = []
 	s = s.split('-')
 	for i, s_ in enumerate(s):
-		if i%2:
-			o.append(changeDotLevels(s_, True))
+		if i % 2:
+			o.append(mergeHexVals(s_, True, debug))
+		isEven = bool(i % 2)
 		curPos = -1
 		for j, c in enumerate(s_):
 			curPos = -1
@@ -77,12 +85,12 @@ def HUC8DotsToHUC6Dots(s, debug=False):
 				curPos = j
 				break
 		if curPos == -1: o.insert(curPos, s[i])
-		else: o.append(s_[0:j]+'-'+changeDotLevels(s_[j:], True))
-	if debug: print(s, o)
+		else: o.append(s_[0:j] + '-' + mergeHexVals(s_[j:], True, debug))
+	if debug: print(":HUC8DotsToHUC6Dots: %s" % s, "->", o)
 	return '-'.join(o)
 
 
-def changeDotLevels(dots, HUC6=False, debug=False):
+def mergeHexVals(dots, HUC6=False, debug=False):
 	out = ""
 	newDots = {
 		'0': '0',
@@ -95,26 +103,37 @@ def changeDotLevels(dots, HUC6=False, debug=False):
 		'7': '1' if HUC6 else '2',
 		'8': '4' if HUC6 else '5'
 	}
-	for dot in dots: out += newDots[dot]
-	if debug: print(":%s, %s, %s" % (dots, HUC6, out))
+	for dot in dots:
+		out += newDots[dot]
+	out = '-'.join([''.join(sorted(out_)) for out_ in out.split('-')])
+	if debug: print(":mergeHexVals:", dots, "->", out)
 	return out
 
 
-def convertChar(c, HUC6=False):
+def convertChar(c, HUC6=False, debug=False):
 	out = ""
 	pattern = getPattern(c, HUC6)
 	ord_ = ord(c)
 	hexVal = hex(ord_)[2:][-4:].upper()
 	if len(hexVal) < 4: hexVal = ("%4s" % hexVal).replace(' ', '0')
+	if debug: print(":convertChar:0:", c, hexVal)
 	for i, l in enumerate(hexVal):
-		out += changeDotLevels(hexVals[l]) if i%2 else ('-' if i > 0 else '')+hexVals[l] 
-	out = '-'.join([''.join(sorted(out_)) for out_ in out.split('-')])
-	if HUC6: out = HUC8DotsToHUC6Dots(out)
+		out += mergeHexVals(
+			hexVals[l], HUC6, debug=debug) if i % 2 else (
+			'-' if i > 0 else '') + hexVals[l]
+		if debug: print(":convertChar:1:", out)
+	if HUC6:
+		out = HUC8DotsToHUC6Dots(out, debug=debug)
 	out = cellDescriptionsToUnicodeBraille(out)
-	if not '…' in pattern: pattern += '…'
-	return pattern.replace('…', out)
+	if '…' not in pattern:
+		pattern += '…'
+	out = pattern.replace('…', out)
+	if debug: print(":convertChar:3:", out)
+	return out
 
-convert = lambda s, HUC6=False: ''.join([convertChar(c, HUC6) for c in s])
+
+def convert(s, HUC6=False, debug=False): return ''.join([convertChar(c, HUC6, debug) for c in s])
+
 
 if __name__ == "__main__":
 	t = input("Text to convert: ")
