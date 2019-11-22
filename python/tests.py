@@ -19,11 +19,10 @@ f = open("res.txt", "wb")
 
 def printAndWriteFile(*args, **kwargs):
 	global f
-	f.write(''.join(args).encode())
-	if "end" not in kwargs.keys():
-		kwargs["end"] = '\n'
-	if kwargs["end"]:
-		f.write(kwargs["end"].encode())
+	if "end" not in kwargs.keys(): kwargs["end"] = '\n'
+	if "sep" not in kwargs.keys(): kwargs["sep"] = ' '
+	f.write((kwargs["sep"]).join(args).encode())
+	if kwargs["end"]: f.write(kwargs["end"].encode())
 	print(*args, **kwargs)
 
 huc.print_ = printAndWriteFile

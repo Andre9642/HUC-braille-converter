@@ -41,12 +41,12 @@ HUC8_patterns = {
 	"⣵⣡": (0x100000, 0x10FFFF)
 }
 
-hexVals = {
-	'0': "245", '1': '1', '2': "12", '3': "14",
-	'4': "145", '5': "15", '6': "124", '7': "1245",
-	'8': "125", '9': "24", 'A': "4",
-	'B': "45", 'C': "25", 'D': "2", 'E': '5', 'F': '0'
-}
+hexVals = [
+	"245", '1', "12", "14",
+	"145", "15", "124", "1245",
+	"125", "24", "4", "45",
+	"25", "2", '5', '0'
+]
 
 print_ = print
 
@@ -67,74 +67,64 @@ def getPattern(c, HUC6=False):
 	ord_ = ord(c)
 	patterns = HUC6_patterns if HUC6 else HUC8_patterns
 	for pattern in patterns.items():
-		if pattern[1][1] >= ord_:
-			return pattern[0]
+		if pattern[1][1] >= ord_: return pattern[0]
 	return '?'
 
-
-def HUC8DotsToHUC6Dots(s, debug=False):
-	o = []
-	s = s.split('-')
-	for i, s_ in enumerate(s):
-		if i % 2:
-			o.append(changeDotLevels(s_, True, debug))
-		isEven = bool(i % 2)
-		curPos = -1
-		for j, c in enumerate(s_):
-			curPos = -1
-			if c in "78":
-				curPos = j
-				break
-		if curPos == -1: o.insert(curPos, s[i])
-		else: o.append(s_[0:j] + '-' + changeDotLevels(s_[j:], True, debug))
-	if debug: print_(":HUC8DotsToHUC6Dots: %s" % s, "->", repr(o))
-	return '-'.join(o)
-
-
-def changeDotLevels(dots, HUC6=False, debug=False):
+def convertHUC6(dots, debug=False):
+	cells = dots.split('-')
+	pattern = "123456141234142512142536"
+	tmp = []
 	out = ""
-	newDots = {
-		'0': '0',
-		'1': '2' if HUC6 else '3',
-		'2': '3' if HUC6 else '7',
-		'3': '1' if HUC6 else '7',
-		'4': '5' if HUC6 else '6',
-		'5': '6' if HUC6 else '8',
-		'6': '4' if HUC6 else '8',
-		'7': '1' if HUC6 else '2',
-		'8': '4' if HUC6 else '5'
-	}
-	for dot in dots:
-		out += newDots[dot]
+	for iCell, cell in enumerate(cells):
+		for dot in "12345678":
+			v = True if dot in cell else False
+			tmp.append(v)
+	l = [1, 2, 3, 4, 5, 6, 7, 9, 10, 8,  11, 12, 13, 15, 17, 14, 16, 18, 19, 21, 23, 20, 22, 24]
+	lenL = len(l)
+	lenTmp = len(tmp)
+	i = 0
+	while i < lenTmp:
+		if (i % 6 == 0 and i != 0): out += "-"
+		toAdd = i//lenL
+		posL = i % lenL
+		pos = (toAdd*lenL)+(l[posL]-1)
+		try: v = tmp[pos]
+		except IndexError: v = False
+		if v: out += str(posL % 6+1)
+		i += 1
+	out = out.strip('-')
+	if debug: print_(":convertHUC6:", dots, "->", out)
+	return out
+
+
+def convertHUC8(dots, debug=False):
+	out = ""
+	newDots = "037768825"
+	for dot in dots: out += newDots[int(dot)]
 	out = '-'.join([''.join(sorted(out_)) for out_ in out.split('-')])
-	if debug: print_(":changeDotLevels:", dots, "->", out)
+	if debug: print_(":convertHUC8:", dots, "->", out)
 	return out
 
 
-def convertChar(c, HUC6=False, debug=False):
+def convert(t, HUC6=False, debug=False):
 	out = ""
-	pattern = getPattern(c, HUC6)
-	ord_ = ord(c)
-	hexVal = hex(ord_)[2:][-4:].upper()
-	if len(hexVal) < 4: hexVal = ("%4s" % hexVal).replace(' ', '0')
-	if debug: print_(":convertChar:0:", c, hexVal)
-	for i, l in enumerate(hexVal):
-		out_ = changeDotLevels(
-			hexVals[l], debug=debug) if i % 2 else (
-			'-' if i > 0 else '') + hexVals[l]
+	for c in t:
+		pattern = getPattern(c, HUC6)
+		ord_ = ord(c)
+		hexVal = hex(ord_)[2:][-4:].upper()
+		if len(hexVal) < 4: hexVal = ("%4s" % hexVal).replace(' ', '0')
+		if debug: print_(":hexVal:", c, hexVal)
+		out_ = ""
+		for i, l in enumerate(hexVal):
+			j = int(l, 16)
+			out_ += convertHUC8(hexVals[j], debug) if i % 2 else ('-' if i > 0 else '') + hexVals[j]
+		if debug: print_(":convertChar: %s -> %s" % (hexVal, out_))
+		if HUC6: out_ = convertHUC6(out_, debug)
+		out_ = cellDescriptionsToUnicodeBraille(out_)
+		if '…' not in pattern: pattern += '…'
+		out_ = pattern.replace('…', out_)
 		out += out_
-		if debug: print_(":convertChar:1: %s -> %s" % (l, out_))
-	if HUC6:
-		out = HUC8DotsToHUC6Dots(out, debug=debug)
-	out = cellDescriptionsToUnicodeBraille(out)
-	if '…' not in pattern:
-		pattern += '…'
-	out = pattern.replace('…', out)
-	if debug: print_(":convertChar:3:", out)
 	return out
-
-
-def convert(s, HUC6=False, debug=False): return ''.join([convertChar(c, HUC6, debug) for c in s])
 
 
 if __name__ == "__main__":
