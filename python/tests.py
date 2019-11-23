@@ -2,7 +2,7 @@
 import sys
 import huc
 
-tests = {
+tests_unicodeBraille = {
 	'0': ("⣥⣺⣩", "⠿⠺⠛⠞"),  # Digit Zero
 	"00": ("⣥⣺⣩⣥⣺⣩", "⠿⠺⠛⠞⠿⠺⠛⠞"),  # 2 × Digit Zero
 	'♯': ("⣥⡧⠋", "⠿⠧⠗⠄"),  # Music Sharp Sign
@@ -15,7 +15,10 @@ tests = {
 	chr(0xffff0): ("⣵⠚⠀⣠", "⠿⠀⠀⠾⠄")
 }
 
-nbTest = len(tests)
+tests_braillePatterns = {
+	'\u12c3': ("13678-137-2356", "123456-13-136-134")
+}
+nbTest = len(tests_unicodeBraille)
 err = 0.0
 f = open("res.txt", "wb")
 
@@ -29,7 +32,9 @@ def printAndWriteFile(*args, **kwargs):
 	print(*args, **kwargs)
 
 huc.print_ = printAndWriteFile
-for i, (s, (expectedHUC8, expectedHUC6)) in enumerate(tests.items(), 1):
+
+printAndWriteFile("== Unicode braille tests ==")
+for i, (s, (expectedHUC8, expectedHUC6)) in enumerate(tests_unicodeBraille.items(), 1):
 	testHUC8 = huc.convert(s, HUC6=False)
 	testHUC6 = huc.convert(s, HUC6=True)
 	printAndWriteFile("Test #%d: %s -> " % (i, s), end="")
@@ -54,6 +59,35 @@ for i, (s, (expectedHUC8, expectedHUC6)) in enumerate(tests.items(), 1):
 				(expectedHUC6, testHUC6)
 			)
 			huc.convert(s, HUC6=True, debug=True)
+
+printAndWriteFile("\n== Braille patterns tests ==")
+
+nbTestsAlreadyDone = nbTest
+nbTest += len(tests_braillePatterns)
+
+for i, (s, (expectedHUC8, expectedHUC6)) in enumerate(tests_braillePatterns.items(), 1):
+	testHUC8 = huc.convert(s, unicodeBraille=False, HUC6=False)
+	testHUC6 = huc.convert(s, unicodeBraille=False, HUC6=True)
+	printAndWriteFile("Test #%d (#%d): %s -> " % (i, (nbTestsAlreadyDone+i), s), end="")
+	if testHUC8 == expectedHUC8 and testHUC6 == expectedHUC6:
+		printAndWriteFile("PASS")
+	else:
+		if testHUC8 != expectedHUC8 and testHUC6 != expectedHUC6:
+			printAndWriteFile("FAIL")
+			err += 1
+		else:
+			printAndWriteFile("HALF FAIL")
+			err += 0.5
+		if testHUC8 != expectedHUC8:
+			printAndWriteFile(
+				"! Invalid HUC 8 result\n - Excepted: %s\n - Received: %s" %
+				(expectedHUC8, testHUC8)
+			)
+		if testHUC6 != expectedHUC6:
+			printAndWriteFile(
+				"! Invalid HUC 6 result\n - Excepted: %s\n - Received: %s" %
+				(expectedHUC6, testHUC6)
+			)
 
 printAndWriteFile("\nGrade: %.2f %%" % ((nbTest - err) / nbTest * 100))
 f.close()

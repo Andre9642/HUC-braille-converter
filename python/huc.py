@@ -2,8 +2,8 @@
 import re
 
 HUC6_patterns = {
-	"⠿…":  (0x000000, 0x00FFFF),
-	"⠿…":  (0x010000, 0x01FFFF),
+	"⠿":  (0x000000, 0x00FFFF),
+	"⠿":  (0x010000, 0x01FFFF),
 	"⠿…⠇": (0x020000, 0x02FFFF),
 	"⠿…⠍": (0x030000, 0x03FFFF),
 	"⠿…⠝": (0x040000, 0x04FFFF),
@@ -58,12 +58,41 @@ def cellDescToChar(cell):
 		toAdd += 1 << int(dot) - 1 if int(dot) > 0 else 0
 	return chr(0x2800 + toAdd)
 
+def charToCellDesc(ch):
+	"""
+	Return a description of an unicode braille char
+	@param ch: the unicode braille character to describe
+		must be between 0x2800 and 0x2999 included
+	@type ch: str
+	@return: the list of dots describing the braille cell
+	@rtype: str
+	@Example: "d" -> "145"
+	"""
+	res = ""
+	if len(ch) != 1: raise ValueError("Param size can only be one char (currently: %d)" % len(ch))
+	p = ord(ch)
+	if p >= 0x2800 and p <= 0x2999: p -= 0x2800
+	if p > 255: raise ValueError(r"It is not an unicode braille (%d)" % p)
+	dots ={1:1, 2:2, 4:3, 8:4,16:5,32:6,64:7, 128:8}
+	i = 1
+	while p != 0:
+		if p - (128 / i) >= 0:
+			res += str(dots[(128/i)])
+			p -= (128 / i)
+		i *= 2
+	return res[::-1] if len(res) > 0 else '0'
+
+
+def unicodeBrailleToDescription(t, sep = '-'):
+	return ''.join([('-'+charToCellDesc(ch)) if ord(ch) >= 0x2800 and ord(ch) <= 0x2999 and ch not in ['\n','\r'] else ch for ch in t]).strip('-')
+
 
 def cellDescriptionsToUnicodeBraille(t):
 	return re.sub(r'([0-8]+)\-?', lambda m: cellDescToChar(m.group(1)), t)
 
 
-def getPattern(c, HUC6=False):
+
+def getPrefixAndSuffix(c, HUC6=False):
 	ord_ = ord(c)
 	patterns = HUC6_patterns if HUC6 else HUC8_patterns
 	for pattern in patterns.items():
@@ -101,6 +130,7 @@ def convertHUC6(dots, debug=False):
 		out += cellTemp if cellTemp else '0'
 		i += 1
 	out = re.sub("0(?:0){0,}([0-8])", r"\1", out)
+	out = re.sub("([1-8])0$", r"\1", out)
 	if debug: print_(":convertHUC6:", dots, "->", out)
 	return out
 
@@ -108,7 +138,6 @@ def convertHUC8(dots, debug=False):
 	out = ""
 	newDots = "037768825"
 	for dot in dots: out += newDots[int(dot)]
-	out = '-'.join([''.join(sorted(out_)) for out_ in out.split('-')])
 	if debug: print_(":convertHUC8:", dots, "->", out)
 	return out
 
@@ -116,26 +145,36 @@ def convertHUC8(dots, debug=False):
 def convert(t, HUC6=False, unicodeBraille=True, debug=False):
 	out = ""
 	for c in t:
-		pattern = getPattern(c, HUC6)
+		pattern = getPrefixAndSuffix(c, HUC6)
+		if not unicodeBraille: pattern = unicodeBrailleToDescription(pattern)+'-'
+		if '…' not in pattern: pattern += '…'
 		ord_ = ord(c)
 		hexVal = hex(ord_)[2:][-4:].upper()
 		if len(hexVal) < 4: hexVal = ("%4s" % hexVal).replace(' ', '0')
 		if debug: print_(":hexVal:", c, hexVal)
 		out_ = ""
+		beg = ""
 		for i, l in enumerate(hexVal):
 			j = int(l, 16)
-			out_ += convertHUC8(hexVals[j], debug) if i % 2 else ('-' if i > 0 else '') + hexVals[j]
-		out_ = re.sub('0([0-8])', r'\1', out_)
-		if debug: print_(":convertChar: %s -> %s" % (hexVal, out_))
+			if i % 2:
+				end = convertHUC8(hexVals[j], debug)
+				cleanCell = ''.join(sorted((beg + end))).replace('0', '')
+				if not cleanCell: cleanCell = '0'
+				if debug: print_(":cell %d:" % ((i+1)//2), cleanCell)
+				out_ += cleanCell
+			else:
+				if i != 0: out_ += "-"
+				beg = hexVals[j]
 		if HUC6:
 			out_ = convertHUC6(out_, debug)
-			if ord_ <= 0x00FFFF: out_ += '3'
-			elif ord_ <= 0x01FFFF: out_ += '6'
-			else: out_ += "36"
-		if unicodeBraille:
-			out_ = cellDescriptionsToUnicodeBraille(out_)
-			if '…' not in pattern: pattern += '…'
-			out_ = pattern.replace('…', out_)
+			if ord_ <= 0x00FFFF: toAdd = '3'
+			elif ord_ <= 0x01FFFF: toAdd = '6'
+			else: toAdd = "36"
+			lastCell = re.sub("^.+-([0-8]+)$", r"\1", out_)
+			newLastCell = ''.join(sorted(toAdd + lastCell))
+			out_ = re.sub("\-([0-8]+)$", '-'+newLastCell, out_)
+		if unicodeBraille: out_ = cellDescriptionsToUnicodeBraille(out_)
+		out_ = pattern.replace('…', out_.strip('-'))
 		out += out_
 	return out
 
