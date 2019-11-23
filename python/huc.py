@@ -93,17 +93,16 @@ def convertHUC6(dots, debug=False):
 					dotTemp = ref2[dotIndexTemp]
 					linedCells2.append(dotTemp)
 		offset = (offset + 1) % 3
-	result = ""
+	out = ""
 	i = 0
 	for l1, l2 in zip(linedCells1, linedCells2):
-		if i % 3 == 0 and i != 0: result += "-"
+		if i % 3 == 0 and i != 0: out += "-"
 		cellTemp = (l1 if l1 != '0' else '') + (l2 if l2 != '0' else '')
-		result += cellTemp
+		out += cellTemp if cellTemp else '0'
 		i += 1
-	while "--" in result: result = result.replace("--", "-0-")
-	if result.startswith('-'): result = '0'+result
-	if result.endswith('-'): result += '0'
-	return result
+	out = re.sub("0(?:0){0,}([0-8])", r"\1", out)
+	if debug: print_(":convertHUC6:", dots, "->", out)
+	return out
 
 def convertHUC8(dots, debug=False):
 	out = ""
@@ -126,14 +125,13 @@ def convert(t, HUC6=False, unicodeBraille=True, debug=False):
 		for i, l in enumerate(hexVal):
 			j = int(l, 16)
 			out_ += convertHUC8(hexVals[j], debug) if i % 2 else ('-' if i > 0 else '') + hexVals[j]
-		out_ = out_.replace('0', '')
+		out_ = re.sub('0([0-8])', r'\1', out_)
 		if debug: print_(":convertChar: %s -> %s" % (hexVal, out_))
 		if HUC6:
 			out_ = convertHUC6(out_, debug)
 			if ord_ <= 0x00FFFF: out_ += '3'
 			elif ord_ <= 0x01FFFF: out_ += '6'
 			else: out_ += "36"
-			out_ = out_.replace('0', '')
 		if unicodeBraille:
 			out_ = cellDescriptionsToUnicodeBraille(out_)
 			if '…' not in pattern: pattern += '…'
@@ -144,5 +142,5 @@ def convert(t, HUC6=False, unicodeBraille=True, debug=False):
 
 if __name__ == "__main__":
 	t = input("Text to convert: ")
-	print_("HUC8: %s" % convert(t))
+	print("HUC8: %s" % convert(t))
 	print("HUC6: %s" % convert(t, True))

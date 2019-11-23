@@ -11,6 +11,8 @@ tests = {
 	'𝄞': ("⣭⠆⢁", "⠿⠆⠂⠰"),  # Musical Symbol G Clef
 	'📀': ("⣭⢤⣲", "⠿⠤⠬⠺"),  # DVD
 	'😀': ("⣭⡤⣺", "⠿⠤⠵⠺"),  # Grinning Face
+	'\uffff': ("⣥⠀⠀", "⠿⠀⠀⠄"),
+	chr(0xffff0): ("⣵⠚⠀⣠", "⠿⠀⠀⠾⠄")
 }
 
 nbTest = len(tests)
@@ -28,8 +30,8 @@ def printAndWriteFile(*args, **kwargs):
 
 huc.print_ = printAndWriteFile
 for i, (s, (expectedHUC8, expectedHUC6)) in enumerate(tests.items(), 1):
-	testHUC8 = huc.convert(s)
-	testHUC6 = huc.convert(s, True)
+	testHUC8 = huc.convert(s, HUC6=False)
+	testHUC6 = huc.convert(s, HUC6=True)
 	printAndWriteFile("Test #%d: %s -> " % (i, s), end="")
 	if testHUC8 == expectedHUC8 and testHUC6 == expectedHUC6:
 		printAndWriteFile("PASS")
@@ -45,13 +47,13 @@ for i, (s, (expectedHUC8, expectedHUC6)) in enumerate(tests.items(), 1):
 				"! Invalid HUC 8 result\n - Excepted: %s\n - Received: %s" %
 				(expectedHUC8, testHUC8)
 			)
-			huc.convert(s, False, True)
+			huc.convert(s, HUC6=False, debug=True)
 		if testHUC6 != expectedHUC6:
 			printAndWriteFile(
 				"! Invalid HUC 6 result\n - Excepted: %s\n - Received: %s" %
 				(expectedHUC6, testHUC6)
 			)
-			huc.convert(s, True, True)
+			huc.convert(s, HUC6=True, debug=True)
 
 printAndWriteFile("\nGrade: %.2f %%" % ((nbTest - err) / nbTest * 100))
 f.close()
