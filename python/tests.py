@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import sys
 import huc
 
 tests = {
@@ -54,3 +55,4 @@ for i, (s, (expectedHUC8, expectedHUC6)) in enumerate(tests.items(), 1):
 
 printAndWriteFile("\nGrade: %.2f %%" % ((nbTest - err) / nbTest * 100))
 f.close()
+sys.exit(int(err))
