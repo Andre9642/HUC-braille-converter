@@ -121,16 +121,18 @@ def convertHUC6(dots, debug=False):
 					dotTemp = ref2[dotIndexTemp]
 					linedCells2.append(dotTemp)
 		offset = (offset + 1) % 3
-	out = ""
+	out = []
 	i = 0
 	for l1, l2 in zip(linedCells1, linedCells2):
-		if i % 3 == 0 and i != 0: out += "-"
+		if i % 3 == 0: out.append("")
 		cellTemp = (l1 if l1 != '0' else '') + (l2 if l2 != '0' else '')
-		out += cellTemp if cellTemp else '0'
+		cellTemp = ''.join(sorted(cellTemp))
+		out[-1] += cellTemp if cellTemp else '0'
+		out[-1] = ''.join(sorted([dot for dot in out[-1] if dot != '0']))
+		if not out[-1]: out[-1]  = '0'
 		i += 1
-	out = re.sub("0(?:0){0,}([0-8])", r"\1", out)
-	out = re.sub("([1-8])0$", r"\1", out)
 	if debug: print_(":convertHUC6:", dots, "->", out)
+	out = '-'.join(out)
 	return out
 
 def convertHUC8(dots, debug=False):
