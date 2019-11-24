@@ -16,13 +16,13 @@ tests_unicodeBraille = {
 }
 
 tests_braillePatterns = {
-	'\u12c3': ("13678-137-2356", "123456-13-136-134")
+	'\u12c3': ("13678-137-2356", "123456-13-136-134"),
+	chr(0xfffe5): ("135678-245-0-358", "123456-0-6-1356-3")
 }
 
 tests_HUC8SwitchDotLevels = {
-	"124": "376",
-	"2": "7",
-	"3": "1",
+	"1245": "3678",
+	"3678": "1245",
 }
 
 nbTest = len(tests_unicodeBraille)

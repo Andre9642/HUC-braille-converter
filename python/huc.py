@@ -45,7 +45,7 @@ hexVals = [
 	"245", '1', "12", "14",
 	"145", "15", "124", "1245",
 	"125", "24", "4", "45",
-	"25", "2", '5', '0'
+	"25", '2', '5', '0'
 ]
 
 print_ = print
@@ -89,7 +89,6 @@ def unicodeBrailleToDescription(t, sep = '-'):
 
 def cellDescriptionsToUnicodeBraille(t):
 	return re.sub(r'([0-8]+)\-?', lambda m: cellDescToChar(m.group(1)), t)
-
 
 
 def getPrefixAndSuffix(c, HUC6=False):
@@ -138,6 +137,7 @@ def convertHUC8(dots, debug=False):
 	out = ""
 	newDots = "037168425"
 	for dot in dots: out += newDots[int(dot)]
+	out = ''.join(sorted(out))
 	if debug: print_(":convertHUC8:", dots, "->", out)
 	return out
 
@@ -146,8 +146,9 @@ def convert(t, HUC6=False, unicodeBraille=True, debug=False):
 	out = ""
 	for c in t:
 		pattern = getPrefixAndSuffix(c, HUC6)
-		if not unicodeBraille: pattern = unicodeBrailleToDescription(pattern)+'-'
+		if not unicodeBraille: pattern = unicodeBrailleToDescription(pattern)
 		if '…' not in pattern: pattern += '…'
+		if not unicodeBraille: pattern = pattern.replace('…', "-…")
 		ord_ = ord(c)
 		hexVal = hex(ord_)[2:][-4:].upper()
 		if len(hexVal) < 4: hexVal = ("%4s" % hexVal).replace(' ', '0')
@@ -167,12 +168,13 @@ def convert(t, HUC6=False, unicodeBraille=True, debug=False):
 				beg = hexVals[j]
 		if HUC6:
 			out_ = convertHUC6(out_, debug)
-			if ord_ <= 0x00FFFF: toAdd = '3'
-			elif ord_ <= 0x01FFFF: toAdd = '6'
+			if ord_ <= 0xFFFF: toAdd = '3'
+			elif ord_ <= 0x1FFFF: toAdd = '6'
 			else: toAdd = "36"
-			lastCell = re.sub("^.+-([0-8]+)$", r"\1", out_)
+			patternLastCell = "^.+-([0-6]+)$"
+			lastCell = re.sub(patternLastCell, r"\1", out_)
 			newLastCell = ''.join(sorted(toAdd + lastCell))
-			out_ = re.sub("\-([0-8]+)$", '-'+newLastCell, out_)
+			out_ = re.sub("-([0-6]+)$", '-'+newLastCell, out_)
 		if unicodeBraille: out_ = cellDescriptionsToUnicodeBraille(out_)
 		out_ = pattern.replace('…', out_.strip('-'))
 		out += out_
@@ -181,5 +183,5 @@ def convert(t, HUC6=False, unicodeBraille=True, debug=False):
 
 if __name__ == "__main__":
 	t = input("Text to convert: ")
-	print("HUC8: %s" % convert(t))
-	print("HUC6: %s" % convert(t, True))
+	print("HUC8:\n- %s\n- %s" % (convert(t), convert(t, unicodeBraille=False)))
+	print("HUC6:\n- %s\n- %s" % (convert(t, HUC6=True), convert(t, HUC6=True, unicodeBraille=False)))
