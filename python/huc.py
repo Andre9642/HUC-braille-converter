@@ -129,9 +129,9 @@ def convertHUC6(dots, debug=False):
 		cellTemp = ''.join(sorted(cellTemp))
 		out[-1] += cellTemp if cellTemp else '0'
 		out[-1] = ''.join(sorted([dot for dot in out[-1] if dot != '0']))
-		if not out[-1]: out[-1]  = '0'
+		if not out[-1]: out[-1] = '0'
 		i += 1
-	if debug: print_(":convertHUC6:", dots, "->", out)
+	if debug: print_(":convertHUC6:", dots, "->", repr(out))
 	out = '-'.join(out)
 	return out
 
@@ -175,7 +175,7 @@ def convert(t, HUC6=False, unicodeBraille=True, debug=False):
 			else: toAdd = "36"
 			patternLastCell = "^.+-([0-6]+)$"
 			lastCell = re.sub(patternLastCell, r"\1", out_)
-			newLastCell = ''.join(sorted(toAdd + lastCell))
+			newLastCell = ''.join(sorted(toAdd + lastCell)).replace('0', '')
 			out_ = re.sub("-([0-6]+)$", '-'+newLastCell, out_)
 		if unicodeBraille: out_ = cellDescriptionsToUnicodeBraille(out_)
 		out_ = pattern.replace('…', out_.strip('-'))
