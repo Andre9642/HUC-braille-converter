@@ -62,7 +62,7 @@ def charToCellDesc(ch):
 	"""
 	Return a description of an unicode braille char
 	@param ch: the unicode braille character to describe
-		must be between 0x2800 and 0x2999 included
+		must be between 0x2800 and 0x28FF included
 	@type ch: str
 	@return: the list of dots describing the braille cell
 	@rtype: str
@@ -71,9 +71,9 @@ def charToCellDesc(ch):
 	res = ""
 	if len(ch) != 1: raise ValueError("Param size can only be one char (currently: %d)" % len(ch))
 	p = ord(ch)
-	if p >= 0x2800 and p <= 0x2999: p -= 0x2800
+	if p >= 0x2800 and p <= 0x28FF: p -= 0x2800
 	if p > 255: raise ValueError(r"It is not an unicode braille (%d)" % p)
-	dots ={1:1, 2:2, 4:3, 8:4,16:5,32:6,64:7, 128:8}
+	dots ={1: 1, 2: 2, 4: 3, 8: 4, 16: 5, 32: 6, 64: 7, 128: 8}
 	i = 1
 	while p != 0:
 		if p - (128 / i) >= 0:
@@ -136,7 +136,7 @@ def convertHUC6(dots, debug=False):
 
 def convertHUC8(dots, debug=False):
 	out = ""
-	newDots = "037768825"
+	newDots = "037168425"
 	for dot in dots: out += newDots[int(dot)]
 	if debug: print_(":convertHUC8:", dots, "->", out)
 	return out

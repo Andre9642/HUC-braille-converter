@@ -18,6 +18,13 @@ tests_unicodeBraille = {
 tests_braillePatterns = {
 	'\u12c3': ("13678-137-2356", "123456-13-136-134")
 }
+
+tests_HUC8SwitchDotLevels = {
+	"124": "376",
+	"2": "7",
+	"3": "1",
+}
+
 nbTest = len(tests_unicodeBraille)
 err = 0.0
 f = open("res.txt", "wb")
@@ -87,6 +94,24 @@ for i, (s, (expectedHUC8, expectedHUC6)) in enumerate(tests_braillePatterns.item
 			printAndWriteFile(
 				"! Invalid HUC 6 result\n - Excepted: %s\n - Received: %s" %
 				(expectedHUC6, testHUC6)
+			)
+
+printAndWriteFile("\n== HUC8 switch level dots tests ==")
+
+nbTestsAlreadyDone = nbTest
+nbTest += len(tests_HUC8SwitchDotLevels)
+
+for i, (s, expectedOut) in enumerate(tests_HUC8SwitchDotLevels.items(), 1):
+	res = huc.convertHUC8(s)
+	printAndWriteFile("Test #%d (#%d): %s -> " % (i, (nbTestsAlreadyDone+i), s), end="")
+	if res == expectedOut:
+		printAndWriteFile("PASS")
+	else:
+		printAndWriteFile("FAIL")
+		err += 1
+		printAndWriteFile(
+				"! Invalid result\n - Excepted: %s\n - Received: %s" %
+				(expectedOut, res)
 			)
 
 printAndWriteFile("\nGrade: %.2f %%" % ((nbTest - err) / nbTest * 100))
