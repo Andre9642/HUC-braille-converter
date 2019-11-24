@@ -179,6 +179,7 @@ def convert(t, HUC6=False, unicodeBraille=True, debug=False):
 			out_ = re.sub("-([0-6]+)$", '-'+newLastCell, out_)
 		if unicodeBraille: out_ = cellDescriptionsToUnicodeBraille(out_)
 		out_ = pattern.replace('…', out_.strip('-'))
+		if out and not unicodeBraille: out += '-'
 		out += out_
 	return out
 
