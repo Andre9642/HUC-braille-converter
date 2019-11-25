@@ -2,8 +2,8 @@
 import re
 
 HUC6_patterns = {
-	"⠿":  (0x000000, 0x00FFFF),
-	"⠿":  (0x010000, 0x01FFFF),
+	"⠿":   (0x000000, 0x00FFFF),
+	"⠿":   (0x010000, 0x01FFFF),
 	"⠿…⠇": (0x020000, 0x02FFFF),
 	"⠿…⠍": (0x030000, 0x03FFFF),
 	"⠿…⠝": (0x040000, 0x04FFFF),
@@ -66,7 +66,7 @@ def charToCellDesc(ch):
 	@type ch: str
 	@return: the list of dots describing the braille cell
 	@rtype: str
-	@Example: "d" -> "145"
+	@example: "d" -> "145"
 	"""
 	res = ""
 	if len(ch) != 1: raise ValueError("Param size can only be one char (currently: %d)" % len(ch))
@@ -83,8 +83,8 @@ def charToCellDesc(ch):
 	return res[::-1] if len(res) > 0 else '0'
 
 
-def unicodeBrailleToDescription(t, sep = '-'):
-	return ''.join([('-'+charToCellDesc(ch)) if ord(ch) >= 0x2800 and ord(ch) <= 0x2999 and ch not in ['\n','\r'] else ch for ch in t]).strip('-')
+def unicodeBrailleToDescription(t, sep='-'):
+	return ''.join([('-'+charToCellDesc(ch)) if ord(ch) >= 0x2800 and ord(ch) <= 0x28FF and ch not in ['\n','\r'] else ch for ch in t]).strip(sep)
 
 
 def cellDescriptionsToUnicodeBraille(t):
