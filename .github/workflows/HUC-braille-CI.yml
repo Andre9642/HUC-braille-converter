@@ -10,8 +10,10 @@ jobs:
         os: [windows-latest, ubuntu-latest]
         python: [3.6, 3.7, 3.8]
         arch: [x86, x64]
+        exclude:
+          - os: ubuntu-latest
+            arch: x86
     runs-on: ${{matrix.os}}
-    if: matrix.os != 'ubuntu-latest' && matrix.arch != 'x86'
     steps:
       - uses: actions/checkout@master
       - name: setup python
