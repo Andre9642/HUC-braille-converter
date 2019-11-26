@@ -1,0 +1,22 @@
+name: HUC-braille-Ci 
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python: [3.6, 3.7, 3.8]
+        arch: [x64]
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@master
+      - name: setup python
+        uses: actions/setup-python@master
+        with:
+          python-version: ${{matrix.python}}
+          architecture: ${{matrix.arch}}
+      - name: run test
+        run: python python/tests.py
