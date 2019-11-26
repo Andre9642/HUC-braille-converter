@@ -21,5 +21,8 @@ jobs:
         with:
           python-version: ${{matrix.python}}
           architecture: ${{matrix.arch}}
+      - name: setup encoding
+        if: matrix.os == 'windows-latest'
+        run: cp 65001
       - name: run test
         run: python python/tests.py
