@@ -27,5 +27,5 @@ jobs:
           chcp 65001
           python python/tests.py
       - name: run test on linux
-        if matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest'
         run: python python/tests.py
