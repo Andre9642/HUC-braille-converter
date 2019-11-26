@@ -11,10 +11,9 @@ jobs:
         python: [3.6, 3.7, 3.8]
         arch: [x86, x64]
     runs-on: ${{matrix.os}}
+    if: matrix.os != 'ubuntu-latest' && matrix.arch != 'x86'
     steps:
       - uses: actions/checkout@master
-        with:
-          fetch-depth: 1
       - name: setup python
         uses: actions/setup-python@master
         with:
