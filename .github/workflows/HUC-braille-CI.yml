@@ -7,12 +7,9 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [ubuntu-latest]
         python: [3.6, 3.7, 3.8]
-        arch: [x86, x64]
-        exclude:
-          - os: ubuntu-latest
-            arch: x86
+        arch: [x64]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@master
@@ -21,11 +18,5 @@ jobs:
         with:
           python-version: ${{matrix.python}}
           architecture: ${{matrix.arch}}
-      - name: run test on windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          chcp 437
-          python python/tests.py
-      - name: run test on linux
-        if: matrix.os == 'ubuntu-latest'
+      - name: run test
         run: python python/tests.py
