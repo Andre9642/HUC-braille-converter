@@ -24,7 +24,7 @@ jobs:
       - name: run test on windows
         if: matrix.os == 'windows-latest'
         run: |
-          chcp 65001
+          chcp 437
           python python/tests.py
       - name: run test on linux
         if: matrix.os == 'ubuntu-latest'
