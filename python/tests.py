@@ -39,7 +39,9 @@ def printAndWriteFile(*args, **kwargs):
 	if "sep" not in kwargs.keys(): kwargs["sep"] = ' '
 	f.write((kwargs["sep"]).join(args).encode())
 	if kwargs["end"]: f.write(kwargs["end"].encode())
-	print(*args, **kwargs)
+	try: print(*args, **kwargs)
+	except UnicodeEncodeError:
+		print(*[arg.encode().decode(sys.stdout.encoding, "backslashreplace") for arg in args], **kwargs)
 
 huc.print_ = printAndWriteFile
 
